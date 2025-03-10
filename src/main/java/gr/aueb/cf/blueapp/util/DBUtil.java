@@ -13,7 +13,7 @@ public class DBUtil {
     static {
         ds.setUrl("jdbc:postgresql://localhost:5432/BlueMargaritaDB");
         ds.setUsername("user-7");
-        ds.setPassword(System.getenv("PASSWD_USER7"));
+        ds.setPassword("12345");
         ds.setInitialSize(10);
         ds.setMinIdle(10);
     }
