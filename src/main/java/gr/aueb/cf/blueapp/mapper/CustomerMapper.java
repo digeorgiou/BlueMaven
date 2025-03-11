@@ -35,5 +35,4 @@ public class CustomerMapper {
                 customer.getCreatedAt(), customer.getUpdatedAt()));
     }
 
-
 }
