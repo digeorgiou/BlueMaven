@@ -1,22 +1,25 @@
 package gr.aueb.cf.blueapp.view_controller;
 
 import gr.aueb.cf.blueapp.Main;
+import gr.aueb.cf.blueapp.dao.CustomerDAOImpl;
+import gr.aueb.cf.blueapp.dao.ICustomerDAO;
+import gr.aueb.cf.blueapp.dao.exceptions.CustomerDAOException;
+import gr.aueb.cf.blueapp.dto.customer.CustomerInsertDTO;
+import gr.aueb.cf.blueapp.dto.customer.CustomerReadOnlyDTO;
+import gr.aueb.cf.blueapp.exceptions.CustomerAlreadyExistsException;
+import gr.aueb.cf.blueapp.service.CustomerServiceImpl;
+import gr.aueb.cf.blueapp.service.ICustomerService;
+import gr.aueb.cf.blueapp.validator.CustomerValidator;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.Color;
-import javax.swing.JLabel;
-import javax.swing.ImageIcon;
-import javax.swing.JTextField;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-
-import javax.swing.JCheckBox;
-import javax.swing.JButton;
+import java.util.Map;
 
 public class CustomersInsertPage extends JFrame {
 
@@ -29,6 +32,11 @@ public class CustomersInsertPage extends JFrame {
 	private JTextField textFieldVAT;
 	private JTextField textFieldDOY;
 	private JTextField textFieldEmail;
+
+	//injecting dao in service and service in controller
+	private final ICustomerDAO customerDAO = new CustomerDAOImpl();
+	private final ICustomerService customerService =
+			new CustomerServiceImpl(customerDAO);
 
 	public CustomersInsertPage() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -164,6 +172,36 @@ public class CustomersInsertPage extends JFrame {
 		contentPane.add(btnReturn);
 		
 		JButton btnSave = new JButton("Αποθήκευση");
+		btnSave.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				CustomerReadOnlyDTO customerReadOnlyDTO;
+
+				//Data Binding
+				CustomerInsertDTO insertDTO = doDataBinding();
+
+				//Validation
+				Map<String, String> errors =
+						CustomerValidator.validate(insertDTO);
+				if(!errors.isEmpty()){
+					//...
+				}
+
+				try {
+					customerReadOnlyDTO =
+							customerService.insertCustomer(insertDTO);
+					JOptionPane.showMessageDialog(null, "Επιτυχής προσθήκη " +
+							"πελάτη με κωδικό " + customerReadOnlyDTO.getCustomerId(),
+							"Εισαγωγή", JOptionPane.INFORMATION_MESSAGE);
+					//todo form instead of message dialog
+				} catch (CustomerDAOException | CustomerAlreadyExistsException ex){
+					JOptionPane.showMessageDialog(null,
+							"Error" + ex.getMessage() , "Error", JOptionPane.ERROR_MESSAGE);
+				}
+
+
+			}
+		});
 		btnSave.setForeground(Color.WHITE);
 		btnSave.setFont(new Font("Tahoma", Font.PLAIN, 18));
 		btnSave.setBackground(new Color(0, 128, 64));
@@ -179,5 +217,18 @@ public class CustomersInsertPage extends JFrame {
 		lblEmail.setFont(new Font("Tahoma", Font.BOLD, 14));
 		lblEmail.setBounds(674, 395, 83, 34);
 		contentPane.add(lblEmail);
+	}
+
+	private CustomerInsertDTO doDataBinding() {
+		String firstname = textFieldFirstname.getText().trim();
+		String lastname = textFieldLastname.getText().trim();
+		String phoneNumber = textFieldPhoneNumber.getText();
+		String address = textFieldAddress.getText();
+		String vat = textFieldVAT.getText().trim();
+		String doy = textFieldDOY.getText().trim();
+		String email = textFieldEmail.getText().trim();
+
+		return new CustomerInsertDTO(firstname, lastname,phoneNumber,address,
+				email,doy,vat);
 	}
 }

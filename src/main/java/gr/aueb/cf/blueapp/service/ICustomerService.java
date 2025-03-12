@@ -14,7 +14,7 @@ public interface ICustomerService {
     CustomerReadOnlyDTO insertCustomer(CustomerInsertDTO dto)
         throws CustomerDAOException, CustomerAlreadyExistsException;
 
-    CustomerReadOnlyDTO updateCustomer(CustomerUpdateDTO dto)
+    CustomerReadOnlyDTO updateCustomer(Integer id, CustomerUpdateDTO dto)
         throws CustomerDAOException, CustomerAlreadyExistsException,
             CustomerNotFoundException;
 

@@ -11,6 +11,8 @@ import gr.aueb.cf.blueapp.mapper.CustomerMapper;
 import gr.aueb.cf.blueapp.model.Customer;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class CustomerServiceImpl implements ICustomerService{
 
@@ -56,28 +58,120 @@ public class CustomerServiceImpl implements ICustomerService{
     }
 
     @Override
-    public CustomerReadOnlyDTO updateCustomer(CustomerUpdateDTO dto)
+    public CustomerReadOnlyDTO updateCustomer(Integer id, CustomerUpdateDTO dto)
             throws CustomerDAOException, CustomerAlreadyExistsException, CustomerNotFoundException {
-        return null;
+        Customer customer;
+        Customer fetchedCustomer;
+        Customer updatedCustomer;
+
+        try{
+            if(customerDAO.getById(id)==null){
+                throw new CustomerNotFoundException("Teacher with id: " + id + "was not found");
+            }
+
+            fetchedCustomer =
+                    customerDAO.getCustomerByPhoneNumber(dto.getPhoneNumber());
+            if(fetchedCustomer != null && !fetchedCustomer.getCustomerId().equals(dto.getCustomerId())){
+                throw new CustomerAlreadyExistsException("Customer with Phone" +
+                        "Number: " + dto.getPhoneNumber() + " already exists");
+            }
+
+            customer = CustomerMapper.mapCustomerUpdateToModel(dto);
+            updatedCustomer = customerDAO.update(customer);
+
+            //logging
+
+            return CustomerMapper.mapCustomerToReadOnlyDTO(updatedCustomer)
+                    .orElseThrow(()->new CustomerDAOException("Error during mapping"));
+
+
+
+        } catch(CustomerDAOException | CustomerAlreadyExistsException |CustomerNotFoundException
+                e) {
+            //logging
+            //rollback
+            throw e;
+        }
     }
 
     @Override
     public void deleteCustomer(Integer id) throws CustomerDAOException, CustomerNotFoundException {
+        try{
+            if(customerDAO.getById(id) == null) {
+                throw new CustomerNotFoundException("Teacher with id " + id + " not found");
+            }
+            //logging
+            customerDAO.delete(id);
 
+        }catch (CustomerDAOException | CustomerNotFoundException e){
+            e.printStackTrace();
+            //logging
+            //rollback
+            throw e;
+        }
     }
 
     @Override
     public CustomerReadOnlyDTO getCustomerById(Integer id) throws CustomerDAOException, CustomerNotFoundException {
-        return null;
+        Customer customer;
+
+        try{
+            customer = customerDAO.getById(id);
+
+            return CustomerMapper.mapCustomerToReadOnlyDTO(customer)
+                    .orElseThrow(()-> new CustomerNotFoundException("Customer" +
+                            " with id " + id + "was not found"));
+        } catch(CustomerDAOException | CustomerNotFoundException e){
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     @Override
     public List<CustomerReadOnlyDTO> getAllCustomers() throws CustomerDAOException {
-        return List.of();
+        List<Customer> customers;
+
+        try{
+            customers = customerDAO.getAll();
+
+            return customers.stream()
+                    .map(CustomerMapper::mapCustomerToReadOnlyDTO)
+                    .flatMap(Optional::stream) //η flatMap αφαιρει τα nulls
+                    .collect(Collectors.toList());
+
+            //εναλλακτικα
+            //return customers.stream()
+            //.map(c -> CustomerMapper.mapCustomerToReadOnlyDTO(c).orElse(null))
+            //.collect(Collectors.toList())
+
+
+        }catch (CustomerDAOException e){
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     @Override
     public List<CustomerReadOnlyDTO> getCustomerByLastname(String lastname) throws CustomerDAOException {
-        return List.of();
+        List<Customer> customers;
+
+        try{
+            customers = customerDAO.getByLastname(lastname);
+
+            return customers.stream()
+                    .map(CustomerMapper::mapCustomerToReadOnlyDTO)
+                    .flatMap(Optional::stream) //η flatMap αφαιρει τα nulls
+                    .collect(Collectors.toList());
+
+            //εναλλακτικα
+            //return customers.stream()
+            //.map(c -> CustomerMapper.mapCustomerToReadOnlyDTO(c).orElse(null))
+            //.collect(Collectors.toList())
+
+
+        }catch (CustomerDAOException e){
+            e.printStackTrace();
+            throw e;
+        }
     }
 }

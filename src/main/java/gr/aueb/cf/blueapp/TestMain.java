@@ -8,18 +8,11 @@ public class TestMain {
 
     public static void main(String[] args) {
 
-        Customer marina = new Customer(11, "Marina", "Karasmani",
-                "2106454575", "Leuktron 2",
-                "marina45@gmail.com", "Ψυχικού", "0001221", null, null);
-
-        CustomerDAOImpl customerDAO = new CustomerDAOImpl();
-
-        try{
-            customerDAO.update(marina);
-            System.out.println(marina.getVAT());
-            System.out.println(marina.getDOY());
-        } catch (CustomerDAOException e) {
-            System.out.println(e.getMessage());;
+        String password = System.getenv("PASSWD_USER7");
+        if (password == null) {
+            System.out.println("Environment variable PASSWD is not set.");
+        } else {
+            System.out.println("Password: " + password);
         }
     }
 }
