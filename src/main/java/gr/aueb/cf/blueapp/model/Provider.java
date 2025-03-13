@@ -1,15 +1,18 @@
 package gr.aueb.cf.blueapp.model;
 
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class Provider {
-    Integer providerId;
-    String providerName;
-    String VAT;
-    String DOY;
-    String address;
-    String phoneNumber;
+    private Integer providerId;
+    private String providerName;
+    private String VAT;
+    private String DOY;
+    private String address;
+    private String phoneNumber;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
 
     // Constructors
@@ -17,13 +20,17 @@ public class Provider {
     public Provider() {
     }
 
-    public Provider(Integer providerId, String providerName, String VAT, String DOY, String address, String phoneNumber) {
+    public Provider(Integer providerId, String providerName, String VAT, String DOY,
+                    String address, String phoneNumber, LocalDateTime createdAt,
+                    LocalDateTime updatedAt) {
         this.providerId = providerId;
         this.providerName = providerName;
         this.VAT = VAT;
         this.DOY = DOY;
         this.address = address;
         this.phoneNumber = phoneNumber;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
     public Provider (Provider provider){
@@ -83,6 +90,22 @@ public class Provider {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
     @Override
